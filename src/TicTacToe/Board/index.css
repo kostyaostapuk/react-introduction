@@ -1,0 +1,5 @@
+.board-row:after{
+    display: grid;
+    clear: both;
+    content: "";
+}
