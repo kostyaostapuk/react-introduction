@@ -9,6 +9,7 @@ export default class TicTacToe extends React.Component {
                 { squares: Array(9).fill(null) }
             ],
             xIsNext: true,
+            stepNumber: 0,
         }
     }
 
@@ -23,7 +24,8 @@ export default class TicTacToe extends React.Component {
             history: history.concat([{
                 squares: squares
             }]),
-            xIsNext: !xIsNext
+            xIsNext: !xIsNext,
+            stepNumber: history.length
         });
     }
 
@@ -41,29 +43,59 @@ export default class TicTacToe extends React.Component {
 
         for(let i=0; i < lines.length; i++){
             const [a, b, c] = lines[i];
-            if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) return squares[a];
+            if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]){
+                return [a,b,c];
+            }
         }
         return null;
     }
 
     renderStatus(){
-        const { history } = this.state;
+        const { history, stepNumber } = this.state;
         const current = history[history.length-1];
-        const winner = this.calculateWinner(current.squares);
-        if(winner) return <div>Winner: {winner}</div>;
 
-        return <div>{winner ? 'Winner:' : 'Next move:'} { winner || this.state.xIsNext}</div>
+        if(stepNumber === 9 && !this.calculateWinner(current.squares)){
+            return <div>Draw!</div>
+        }
+
+        const winnerSquares = this.calculateWinner(current.squares);
+        let status;
+        if (!winnerSquares) {
+            status = `Next move: ${ this.state.xIsNext ? 'X' : 'O'}`;
+        } else {
+            status = `Winner: ${current.squares[winnerSquares[0]]}`;
+        }
+        return <div>{status}</div>
+
+    }
+    jumpTo(step){
+        this.setState({
+            stepNumber: step,
+            xIsNext: (step % 2) === 0
+        })
+    }
+    renderHistory(){
+        const { history } = this.state;
+        return <ol>{
+            history.map((_, step)=>{
+                const desc = step ? 'Jump to step #' + step : 'To start game';
+                return <li key={step}><button onClick={()=>this.jumpTo(step)}>{desc}</button></li>;
+            })
+        }</ol>;
     }
 
     render() {
-        const { history } = this.state;
-        const current = history[history.length-1];
+        const { history, stepNumber } = this.state;
+        const current = history[stepNumber];
         return <>
             {this.renderStatus()}
             <Board
                 squares={current.squares}
+                winnerSquares={this.calculateWinner(current.squares)}
                 onClick={(i)=>this.handleClick(i)}
             />
+
+            {this.renderHistory()}
         </>;
     }
 }

@@ -7,7 +7,13 @@ export default class Board extends React.Component {
         super();
     }
     renderSquare(i){
-        return  <Square value={this.props.squares[i]} onClick={()=>this.props.onClick(i)}/>
+        return  <Square isWinner={this.isWinnerSquare(i)} value={this.props.squares[i]} onClick={()=>this.props.onClick(i)}/>
+    }
+    isWinnerSquare(i){
+        const { winnerSquares } = this.props;
+        if(!winnerSquares) return false;
+
+        return winnerSquares.some(square=> square === i);
     }
     render() {
         return <div className="board">
